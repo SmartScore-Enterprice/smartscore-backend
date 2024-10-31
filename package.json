@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
+"scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "bun run src/app.js",
-    "dev": "bun run src/app.js --watch",
-    "setup-env": "bun run cp .env.example .env"
-  },
+    "start": "bun run src/app.js || npm run start:node",
+    "start:node": "node src/app.js",
+    "dev": "bun run src/app.js --watch || npm run dev:node",
+    "dev:node": "nodemon src/app.js",
+    "setup-env": "bun run cp .env.example .env || npm run setup-env:node",
+    "setup-env:node": "cp .env.example .env"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SmartScore-Enterprice/smartscore-backend.git"
