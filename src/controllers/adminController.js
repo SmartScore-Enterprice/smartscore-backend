@@ -1,6 +1,6 @@
 const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
 const jwt = require('jsonwebtoken');
-const prisma = require('../../prisma'); // Assuming Prisma is configured in the project root
+const prisma = require('../../prisma/prismaClient'); // Assuming Prisma is configured in the project root
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secure-jwt-secret';
 
 // Register a new admin
