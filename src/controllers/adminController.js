@@ -1,7 +1,10 @@
+// controllers/adminController.js
 const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
 const jwt = require('jsonwebtoken');
-const prisma = require('../../prisma/prismaClient'); // Assuming Prisma is configured in the project root
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secure-jwt-secret';
+const prisma = require('../../prisma/prismaClient');
+require('dotenv').config();  // Ensure dotenv is loaded to read environment variables
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secure-jwt-secret';  // Ensure this matches across the app
 
 // Register a new admin
 async function registerAdmin(req, res) {
@@ -25,6 +28,7 @@ async function registerAdmin(req, res) {
 }
 
 // Login for existing admin
+// controllers/adminController.js
 async function loginAdmin(req, res) {
   try {
     const { email, password } = req.body;
@@ -39,12 +43,21 @@ async function loginAdmin(req, res) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: admin.id, email: admin.email }, JWT_SECRET, { expiresIn: '1h' });
+    // Include role (admin rights) in the token payload
+    const token = jwt.sign(
+      { id: admin.id, email: admin.email, role: 'admin' }, // Add role to the payload
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    console.log('Generated token:', token);  // Log the token for debugging
+
     res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error: error.message });
   }
 }
+
 
 module.exports = {
   registerAdmin,

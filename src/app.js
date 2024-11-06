@@ -1,8 +1,16 @@
-// src/app.js
-
 const express = require('express');
 const dotenv = require('dotenv');
-const authenticateToken = require('./middleware/authMiddleware'); // Adjust the path if necessary
+const cors = require('cors');
+const authenticateToken = require('./middleware/authMiddleware');
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+app.use(cors());
+
+// Middleware to parse incoming JSON
+app.use(express.json());
 
 // Import your routes
 const studentRoutes = require('./routes/studentRoutes');
@@ -12,25 +20,17 @@ const subjectsRoutes = require('./routes/subjectsRoutes');
 const classesRoutes = require('./routes/classesRoutes');
 const scoresRoutes = require('./routes/scoresRoutes');
 const notificationsRoutes = require('./routes/notificationsRoutes');
-const adminRoutes = require('./routes/adminRoutes'); // Import admin routes
-
-// Load environment variables
-dotenv.config();
-
-const app = express();
-
-// Middleware to parse incoming JSON
-app.use(express.json());
+const adminRoutes = require('./routes/adminRoutes');
 
 // Use your routes
 app.use('/api/students', studentRoutes);
 app.use('/api/schools', schoolsRoutes);
 app.use('/api/teachers', teachersRoutes);
-app.use('/api/classes', authenticateToken, classesRoutes); // Route for classes
+app.use('/api/classes', authenticateToken, classesRoutes);
 app.use('/api/subjects', authenticateToken, subjectsRoutes);
 app.use('/api/scores', authenticateToken, scoresRoutes);
-app.use('/api/notifications', notificationsRoutes); // Make sure notificationsRoutes are under /api/notifications
-app.use('/api/admin', adminRoutes); // Use admin routes under /api/admin
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/', (req, res) => {

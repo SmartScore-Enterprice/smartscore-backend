@@ -1,14 +1,26 @@
+// middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secure-jwt-secret';  // Use the same secret
 
 function authenticateToken(req, res, next) {
-  const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
-  if (!token) return res.sendStatus(401); // Unauthorized
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];  // Extract token after "Bearer"
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // Forbidden
-    req.user = user;
-    next();
+  console.log('Received token:', token);  // Log the token for debugging
+
+  if (!token) {
+    return res.status(403).json({ message: 'Access denied. No token provided.' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.error('JWT Verification Error:', err.message);  // Log the error for debugging
+      return res.status(401).json({ message: 'Invalid token.' });
+    }
+
+    req.user = decoded;  // Attach decoded user data to request object
+    next();  // Proceed to next middleware or route handler
   });
 }
 
-module.exports = authenticateToken; // This line should be correct
+module.exports = authenticateToken;
