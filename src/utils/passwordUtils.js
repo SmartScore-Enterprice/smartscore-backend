@@ -1,20 +1,17 @@
-// utils/passwordUtils.js
+const bcrypt = require('bcryptjs');
 
-const bcrypt = require('bcrypt');
-
-// Function to hash a password
+// Function to hash the password
 async function hashPassword(password) {
-    const saltRounds = 10; // Number of salt rounds for hashing
-    return await bcrypt.hash(password, saltRounds);
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 }
 
-// Function to verify a password
-async function verifyPassword(password, hashedPassword) {
-    return await bcrypt.compare(password, hashedPassword);
+// Function to verify the password
+async function verifyPassword(plainPassword, hashedPassword) {
+  return await bcrypt.compare(plainPassword, hashedPassword);
 }
 
-// Export the functions
 module.exports = {
-    hashPassword,
-    verifyPassword,
+  hashPassword,
+  verifyPassword,
 };
