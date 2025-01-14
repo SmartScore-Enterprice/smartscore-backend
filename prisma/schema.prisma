@@ -4,17 +4,134 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider = "prisma-client-js"
-}
+// schema.prisma
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String    @unique
+  passwordDigest String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  schools        School[]
+
+  schoolId       Int?
+}
+
+model School {
+  id         Int       @id @default(autoincrement())
+  name       String
+  brand      String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  adminId    Int?
+  admin      Admin?    @relation(fields: [adminId], references: [id])
+  students   Student[]
+  teachers   Teacher[]
+  classes    Class[]
+}
+
+model Student {
+  studentId        Int             @id @default(autoincrement())
+  name             String
+  passwordDigest   String
+  parentContactInfo Json           // Parent/guardian details
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  schoolId         Int
+  school           School          @relation(fields: [schoolId], references: [id])
+  classId          Int
+  class            Class           @relation(fields: [classId], references: [id])
+  scores           Score[]
+  notifications    Notification[]
+}
+
+model Teacher {
+  id              Int       @id @default(autoincrement())
+  name            String
+  email           String    @unique
+  passwordDigest  String
+  isClassTeacher  Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  schoolId        Int
+  school          School    @relation(fields: [schoolId], references: [id])
+  classes         Class[]
+  scores          Score[]
+  subjects        Subject[]
+}
+
+model Subject {
+  id         Int       @id @default(autoincrement())
+  name       String
+  code       String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  classId    Int
+  classes    Class[]
+  teachers   Teacher[]
+}
+
+model Class {
+  id         Int       @id @default(autoincrement())
+  name       String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  schoolId   Int
+  school     School    @relation(fields: [schoolId], references: [id])
+  subjectId  Int
+  subject    Subject   @relation(fields: [subjectId], references: [id])
+  teacherId  Int
+  teacher    Teacher   @relation(fields: [teacherId], references: [id])
+  students   Student[]
+  scores     Score[]
+}
+
+model Score {
+  id         Int       @id @default(autoincrement())
+  caScore    Float
+  examScore  Float
+  finalScore Float
+  remarks    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  studentId  Int
+  student    Student   @relation(fields: [studentId], references: [studentId])
+  classId    Int
+  class      Class     @relation(fields: [classId], references: [id])
+  teacherId  Int       // Added field to link back to the Teacher model
+  teacher    Teacher   @relation(fields: [teacherId], references: [id])
+}
+
+model Notification {
+  id         Int       @id @default(autoincrement())
+  message    String
+  sentAt     DateTime
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  studentId  Int
+  student    Student   @relation(fields: [studentId], references: [studentId])
 }
