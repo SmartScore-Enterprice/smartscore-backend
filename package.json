@@ -10,6 +10,7 @@
     "dev": "bun run src/app.js --watch || npm run dev:node",
     "dev:node": "nodemon src/app.js",
     "setup-env": "bun run cp .env.example .env || npm run setup-env:node",
+    "build": "tsc",
     "setup-env:node": "cp .env.example .env"
   },
   "repository": {
