@@ -1,3 +1,4 @@
 name = "smartscore-backend"
 main = "src/app.js"  # Change to your actual entry file
 compatibility_date = "2024-03-07"
+compatibility_flags = ["nodejs_compat"]
