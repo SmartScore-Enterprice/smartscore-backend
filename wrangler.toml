@@ -1,4 +1,7 @@
 name = "smartscore-backend"
-main = "src/app.js"  # Change to your actual entry file
-compatibility_date = "2024-03-07"
-compatibility_flags = ["nodejs_compat"]
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+[build]
+command = "npm run build"
+
