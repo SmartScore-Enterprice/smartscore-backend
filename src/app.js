@@ -7,7 +7,9 @@ const authenticateToken = require('./middleware/authMiddleware');
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173' // Replace with your frontend URL
+}));
 
 // Middleware to parse incoming JSON
 app.use(express.json());
