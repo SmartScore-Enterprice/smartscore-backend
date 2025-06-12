@@ -1,38 +1,39 @@
-
 const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../prisma/prismaClient'); // Assuming Prisma is configured in the project root
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secure-jwt-secret';
-
-// Helper function to generate a unique student ID
-function generateStudentId() {
-  return 'STU-' + Math.floor(100000 + Math.random() * 900000).toString();
-}
+const StudentIdService = require('../services/StudentIdService');
 
 // Register a new student
 async function signup(req, res) {
   try {
-      const { name, email, password, parentContactInfo } = req.body; // Ensure this is included
+      const { name, email, password, parentContactInfo, schoolId } = req.body;
 
-      // Validate the presence of parentContactInfo
-      if (!parentContactInfo) {
-          return res.status(400).json({ message: 'Parent contact information is required' });
+      if (!parentContactInfo || !schoolId) {
+          return res.status(400).json({ message: 'Parent contact information and school ID are required' });
       }
 
       const hashedPassword = await hashPassword(password);
-      const studentId = generateStudentId();
+      
+      // Generate school-specific student ID
+      const generatedStudentId = await StudentIdService.generateStudentId(schoolId);
 
       const newStudent = await prisma.student.create({
           data: {
               name,
               email,
               passwordDigest: hashedPassword,
-              student_id: studentId,
-              parentContactInfo, // Include parentContactInfo
+              studentIdGenerated: generatedStudentId,
+              parentContactInfo,
+              schoolId: parseInt(schoolId)
           },
       });
 
-      res.status(201).json({ message: 'Student registered successfully', student: newStudent });
+      res.status(201).json({ 
+          message: 'Student registered successfully', 
+          student: newStudent,
+          generatedId: generatedStudentId
+      });
   } catch (error) {
       res.status(500).json({ message: 'Error registering student', error: error.message });
   }
