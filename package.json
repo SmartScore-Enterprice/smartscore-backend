@@ -28,7 +28,9 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.7",
+    "twilio": "^4.19.0"
   },
   "devDependencies": {
     "itty-router": "^5.0.18",
