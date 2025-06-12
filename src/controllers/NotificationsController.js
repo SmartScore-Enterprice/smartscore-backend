@@ -1,6 +1,7 @@
-const prisma = require('../../prisma/prismaClient'); // Adjust the path as necessary
+const prisma = require('../../prisma/prismaClient');
+const NotificationService = require('../services/NotificationService');
 
-// List all notifications for a student
+// List all notifications for a specific student
 async function index(req, res) {
   try {
     const { studentId } = req.params;
@@ -10,8 +11,8 @@ async function index(req, res) {
     }
 
     const notifications = await prisma.notification.findMany({
-      where: { student_id: parseInt(studentId, 10) },
-      orderBy: { sent_at: 'desc' }, // Order by sent date, most recent first
+      where: { studentId: parseInt(studentId, 10) },
+      orderBy: { sentAt: 'desc' },
     });
 
     res.status(200).json(notifications);
@@ -23,23 +24,65 @@ async function index(req, res) {
 // Send a notification to a student
 async function create(req, res) {
   try {
-    const { student_id, message } = req.body;
+    const { studentId, message, options = {} } = req.body;
 
-    if (!student_id || !message) {
+    if (!studentId || !message) {
       return res.status(400).json({ message: 'Student ID and message are required' });
     }
 
-    const newNotification = await prisma.notification.create({
-      data: {
-        student_id: parseInt(student_id, 10),
-        message,
-        sent_at: new Date(), // Set the sent_at timestamp to the current time
-      },
-    });
+    const notification = await NotificationService.sendCustomNotification(
+      parseInt(studentId, 10), 
+      message, 
+      options
+    );
 
-    res.status(201).json({ message: 'Notification sent successfully', notification: newNotification });
+    res.status(201).json({ 
+      message: 'Notification sent successfully', 
+      notification 
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error sending notification', error: error.message });
+  }
+}
+
+// Send bulk notifications
+async function sendBulk(req, res) {
+  try {
+    const { studentIds, message, options = {} } = req.body;
+
+    if (!studentIds || !Array.isArray(studentIds) || !message) {
+      return res.status(400).json({ message: 'Student IDs array and message are required' });
+    }
+
+    const results = await NotificationService.sendBulkNotification(studentIds, message, options);
+
+    res.status(200).json({
+      message: 'Bulk notifications processed',
+      results
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending bulk notifications', error: error.message });
+  }
+}
+
+// Get notification statistics
+async function getStats(req, res) {
+  try {
+    const { schoolId } = req.params;
+    const { dateRange = 30 } = req.query;
+
+    if (!schoolId) {
+      return res.status(400).json({ message: 'School ID is required' });
+    }
+
+    const stats = await NotificationService.getNotificationStats(
+      parseInt(schoolId, 10), 
+      parseInt(dateRange, 10)
+    );
+
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(500).json({ message: 'Error getting notification statistics', error: error.message });
   }
 }
 
@@ -52,7 +95,10 @@ async function destroy(req, res) {
       where: { id: parseInt(id, 10) },
     });
 
-    res.status(200).json({ message: 'Notification deleted successfully', notification: deletedNotification });
+    res.status(200).json({ 
+      message: 'Notification deleted successfully', 
+      notification: deletedNotification 
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting notification', error: error.message });
   }
@@ -61,5 +107,7 @@ async function destroy(req, res) {
 module.exports = {
   index,
   create,
+  sendBulk,
+  getStats,
   destroy,
 };
