@@ -47,6 +47,7 @@ model Student {
   parentContactInfo Json           // Parent/guardian details
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+  studentIdGenerated String?       // Add this field for the generated ID
 
   // Relations
   schoolId         Int
@@ -55,6 +56,8 @@ model Student {
   class            Class           @relation(fields: [classId], references: [id])
   scores           Score[]
   notifications    Notification[]
+  resultCheckers   ResultChecker[]
+  resultCheckerLogs ResultCheckerLog[]
 }
 
 model Teacher {
@@ -102,6 +105,8 @@ model Class {
   teacher    Teacher   @relation(fields: [teacherId], references: [id])
   students   Student[]
   scores     Score[]
+  resultCheckers    ResultChecker[]
+  resultCheckerLogs ResultCheckerLog[]
 }
 
 model Score {
@@ -128,8 +133,45 @@ model Notification {
   sentAt     DateTime
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  type         String?   // 'RESULT_ALERT', 'CA_ALERT', 'CUSTOM'
+  status       String    @default("PENDING") // 'PENDING', 'SENT', 'FAILED'
+  metadata     Json?     // Additional notification data
 
   // Relations
   studentId  Int
   student    Student   @relation(fields: [studentId], references: [studentId])
+}
+
+model ResultChecker {
+  id            Int       @id @default(autoincrement())
+  studentId     Int
+  classId       Int
+  token         String    @unique
+  trialCount    Int       @default(0)
+  maxTrials     Int       @default(3)
+  isActive      Boolean   @default(true)
+  expiresAt     DateTime
+  lastAccessedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  student       Student   @relation(fields: [studentId], references: [studentId])
+  class         Class     @relation(fields: [classId], references: [id])
+
+  @@unique([studentId, classId])
+}
+
+model ResultCheckerLog {
+  id           Int       @id @default(autoincrement())
+  studentId    Int
+  classId      Int
+  attemptType  String    // 'SUCCESS', 'FAILED'
+  reason       String?
+  ipAddress    String?
+  attemptedAt  DateTime  @default(now())
+
+  // Relations
+  student      Student   @relation(fields: [studentId], references: [studentId])
+  class        Class     @relation(fields: [classId], references: [id])
 }
