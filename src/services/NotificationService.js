@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 class NotificationService {
   constructor() {
     // Email transporter setup using Brevo SMTP
-    this.emailTransporter = nodemailer.createTransporter({
+    this.emailTransporter = nodemailer.createTransport({
       host: process.env.BREVO_SMTP_HOST || 'smtp-relay.brevo.com',
       port: process.env.BREVO_SMTP_PORT || 587,
       secure: false,
@@ -398,4 +398,4 @@ class NotificationService {
   }
 }
 
-module.exports = new NotificationService();
+module.exports = NotificationService;

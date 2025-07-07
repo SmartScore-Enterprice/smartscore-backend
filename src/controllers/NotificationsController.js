@@ -1,6 +1,9 @@
 const prisma = require('../../prisma/prismaClient');
 const NotificationService = require('../services/NotificationService');
 
+// Create a notification service instance
+const notificationService = new NotificationService();
+
 // List all notifications for a specific student
 async function index(req, res) {
   try {
@@ -30,7 +33,7 @@ async function create(req, res) {
       return res.status(400).json({ message: 'Student ID and message are required' });
     }
 
-    const notification = await NotificationService.sendCustomNotification(
+    const notification = await notificationService.sendCustomNotification(
       parseInt(studentId, 10), 
       message, 
       options
@@ -54,7 +57,7 @@ async function sendBulk(req, res) {
       return res.status(400).json({ message: 'Student IDs array and message are required' });
     }
 
-    const results = await NotificationService.sendBulkNotification(studentIds, message, options);
+    const results = await notificationService.sendBulkNotification(studentIds, message, options);
 
     res.status(200).json({
       message: 'Bulk notifications processed',
@@ -75,7 +78,7 @@ async function getStats(req, res) {
       return res.status(400).json({ message: 'School ID is required' });
     }
 
-    const stats = await NotificationService.getNotificationStats(
+    const stats = await notificationService.getNotificationStats(
       parseInt(schoolId, 10), 
       parseInt(dateRange, 10)
     );
